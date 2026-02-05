@@ -1,0 +1,26 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended",
+    ":semanticCommits",
+    ":automergeMinor"
+  ],
+  "labels": ["dependencies"],
+  "rangeStrategy": "bump",
+  "packageRules": [
+    {
+      "matchUpdateTypes": ["minor", "patch"],
+      "automerge": true
+    },
+    {
+      "matchPackageNames": ["wrangler", "@cloudflare/workers-types"],
+      "groupName": "Cloudflare Workers",
+      "automerge": true
+    },
+    {
+      "matchPackageNames": ["typescript"],
+      "automerge": false
+    }
+  ],
+  "schedule": ["before 5am on Monday"]
+}

@@ -1,13 +1,13 @@
 # 🔍 Backend Engineer Detective
 
-**Solve 16 production incidents from PlayStation-scale scenarios.**
+**Solve 22 production incidents from PlayStation-scale scenarios.**
 
 An interactive detective game where you investigate real-world backend engineering incidents. Analyze logs, metrics, code, and testimonies to diagnose root causes — with an AI mentor to guide your investigation.
 
 ### 🎮 [Play Now → backend-engineer-detective.davidsyagustin.workers.dev](https://backend-engineer-detective.davidsyagustin.workers.dev)
 
 ![Theme](https://img.shields.io/badge/theme-detective%20noir-black)
-![Cases](https://img.shields.io/badge/cases-16-e94560)
+![Cases](https://img.shields.io/badge/cases-22-e94560)
 ![Difficulty](https://img.shields.io/badge/difficulty-junior%20→%20principal-f0a500)
 ![Platform](https://img.shields.io/badge/platform-Cloudflare%20Workers-F6821F)
 [![Live Demo](https://img.shields.io/badge/demo-live-brightgreen)](https://backend-engineer-detective.davidsyagustin.workers.dev)
@@ -16,7 +16,7 @@ An interactive detective game where you investigate real-world backend engineeri
 
 ## 🎮 How It Works
 
-1. **Pick a Case** — Choose from 16 incidents across database, caching, networking, auth, memory, and distributed systems
+1. **Pick a Case** — Choose from 22 incidents across database, caching, networking, auth, memory, and distributed systems
 2. **Investigate** — Examine clues progressively: error logs, metrics dashboards, code snippets, config files, and engineer testimonies
 3. **Chat with Detective Claude** — Your AI mentor asks Socratic questions to guide your thinking (without giving away the answer)
 4. **Submit Your Diagnosis** — Describe the root cause in your own words
@@ -24,7 +24,7 @@ An interactive detective game where you investigate real-world backend engineeri
 
 ---
 
-## 🗂️ The 16 Cases
+## 🗂️ The 22 Cases
 
 | # | Case | Difficulty | Category |
 |---|------|------------|----------|
@@ -44,6 +44,12 @@ An interactive detective game where you investigate real-world backend engineeri
 | 14 | The Invisible API | Junior | Networking |
 | 15 | The Vanishing Multiplayer Matches | Senior | Networking |
 | 16 | The Invisible Traffic Spike | Principal | Distributed |
+| 17 | The Kubernetes Pod Mystery | Mid | Distributed |
+| 18 | The Kafka Consumer Catastrophe | Senior | Distributed |
+| 19 | The GraphQL Performance Nightmare | Mid | Database |
+| 20 | The WebSocket Memory Drain | Senior | Memory |
+| 21 | The Feature Flag Fiasco | Mid | Distributed |
+| 22 | The Elasticsearch Indexing Storm | Senior | Distributed |
 
 ---
 
