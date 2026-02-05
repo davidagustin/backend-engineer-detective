@@ -12,7 +12,8 @@ import {
   addChatMessage,
   addStreamingMessage,
   finalizeStreamingMessage,
-  updateScoreDisplay
+  updateScoreDisplay,
+  setSubmitLoading
 } from './components/case-view.js';
 import { renderSolution } from './components/solution.js';
 
@@ -192,6 +193,9 @@ async function handleSubmitDiagnosis(caseId, { phase, diagnosis, proposedSolutio
     attemptCount = state.recordAttempt(appState, caseId);
   }
 
+  // Show loading state on submit button
+  setSubmitLoading(mainContainer, phase, true);
+
   try {
     const result = await api.checkDiagnosis(
       caseId,
@@ -201,6 +205,9 @@ async function handleSubmitDiagnosis(caseId, { phase, diagnosis, proposedSolutio
       attemptCount,
       progress.cluesRevealed
     );
+
+    // Clear loading state
+    setSubmitLoading(mainContainer, phase, false);
 
     // Show feedback
     showDiagnosisFeedback(mainContainer, result);
@@ -232,10 +239,12 @@ async function handleSubmitDiagnosis(caseId, { phase, diagnosis, proposedSolutio
     }
   } catch (error) {
     console.error('Failed to check diagnosis:', error);
+    // Clear loading state on error
+    setSubmitLoading(mainContainer, phase, false);
     showDiagnosisFeedback(mainContainer, {
       correct: false,
       partial: false,
-      feedback: '❌ Failed to check diagnosis. Please try again.',
+      feedback: 'Failed to check diagnosis. Please try again.',
     });
   }
 }

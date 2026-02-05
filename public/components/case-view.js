@@ -254,7 +254,7 @@ function renderDiagnosisSection(caseData, progress) {
               ></textarea>
             </div>
             <button class="btn btn-primary" id="btn-submit-phase1">
-              <i data-lucide="send"></i> Submit Root Cause
+              <span class="btn-text"><i data-lucide="send"></i> Submit Root Cause</span>
             </button>
           `}
         </div>
@@ -277,7 +277,7 @@ function renderDiagnosisSection(caseData, progress) {
               ></textarea>
             </div>
             <button class="btn btn-primary" id="btn-submit-phase2">
-              <i data-lucide="send"></i> Submit Solution
+              <span class="btn-text"><i data-lucide="send"></i> Submit Solution</span>
             </button>
           ` : `
             <p class="phase-locked-message">
@@ -577,5 +577,26 @@ export function updateHintsCount(container, count) {
   const hintsEl = container.querySelector('#hints-count');
   if (hintsEl) {
     hintsEl.textContent = count;
+  }
+}
+
+/**
+ * Set loading state on submit button
+ * @param {HTMLElement} container - The main container
+ * @param {number} phase - The phase (1 or 2)
+ * @param {boolean} isLoading - Whether to show loading state
+ */
+export function setSubmitLoading(container, phase, isLoading) {
+  const btnId = phase === 1 ? '#btn-submit-phase1' : '#btn-submit-phase2';
+  const btn = container.querySelector(btnId);
+
+  if (!btn) return;
+
+  if (isLoading) {
+    btn.classList.add('btn-loading');
+    btn.disabled = true;
+  } else {
+    btn.classList.remove('btn-loading');
+    btn.disabled = false;
   }
 }

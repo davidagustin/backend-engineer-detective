@@ -252,6 +252,32 @@ a:hover {
   background-color: #dba000;
 }
 
+/* Button Loading State */
+.btn.btn-loading {
+  position: relative;
+  pointer-events: none;
+  opacity: 0.8;
+}
+
+.btn.btn-loading .btn-text {
+  visibility: hidden;
+}
+
+.btn.btn-loading::after {
+  content: '';
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  top: 50%;
+  left: 50%;
+  margin-left: -9px;
+  margin-top: -9px;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
 .btn-back {
   background: none;
   border: none;
