@@ -199,14 +199,16 @@ function renderClue(clue, index) {
 }
 
 /**
- * Render diagnosis section
+ * Render diagnosis section with two-phase system
  */
 function renderDiagnosisSection(caseData, progress) {
   if (progress.solved) {
+    const scoreDisplay = progress.score !== null ? `Score: ${progress.score} pts` : '';
     return `
       <section class="diagnosis-section solved">
         <h2><i data-lucide="badge-check" class="section-icon text-success"></i> Case Closed!</h2>
-        <p class="solved-message">You correctly identified the root cause.</p>
+        <p class="solved-message">You correctly identified the root cause and proposed a valid solution.</p>
+        ${scoreDisplay ? `<p class="final-score"><i data-lucide="trophy" class="inline-icon"></i> ${scoreDisplay}</p>` : ''}
         <button class="btn btn-primary" id="btn-view-solution"><i data-lucide="eye"></i> View Full Solution</button>
       </section>
     `;
@@ -222,21 +224,70 @@ function renderDiagnosisSection(caseData, progress) {
     `;
   }
 
+  // Two-phase diagnosis UI
+  const phase1Complete = progress.rootCauseCorrect;
+
   return `
     <section class="diagnosis-section">
-      <h2><i data-lucide="target" class="section-icon"></i> Your Diagnosis</h2>
-      <p class="diagnosis-instructions">Based on the evidence, what's causing this incident?</p>
+      <h2><i data-lucide="target" class="section-icon"></i> Your Analysis</h2>
 
       <div class="diagnosis-form">
-        <textarea
-          id="diagnosis-input"
-          placeholder="Describe the root cause of the incident..."
-          rows="4"
-        ></textarea>
-        <div class="diagnosis-actions">
-          <button class="btn btn-primary" id="btn-submit-diagnosis">
-            <i data-lucide="send"></i> Submit Diagnosis
-          </button>
+        <!-- Phase 1: Root Cause -->
+        <div class="diagnosis-phase ${phase1Complete ? 'phase-complete' : 'phase-active'}">
+          <div class="phase-header">
+            <span class="phase-label">Phase 1: Root Cause</span>
+            ${phase1Complete ? '<i data-lucide="check-circle" class="phase-status text-success"></i>' : ''}
+          </div>
+          ${phase1Complete ? `
+            <div class="phase-answer">
+              <p class="submitted-answer">"${escapeHtml(progress.submittedRootCause)}"</p>
+            </div>
+          ` : `
+            <div class="form-group">
+              <label for="diagnosis-input">
+                <span class="label-hint">What is causing this incident?</span>
+              </label>
+              <textarea
+                id="diagnosis-input"
+                placeholder="e.g., Connection pool exhaustion due to connections not being released after use..."
+                rows="3"
+              ></textarea>
+            </div>
+            <button class="btn btn-primary" id="btn-submit-phase1">
+              <i data-lucide="send"></i> Submit Root Cause
+            </button>
+          `}
+        </div>
+
+        <!-- Phase 2: Proposed Solution -->
+        <div class="diagnosis-phase ${phase1Complete ? 'phase-active' : 'phase-locked'}">
+          <div class="phase-header">
+            <span class="phase-label">Phase 2: Proposed Solution</span>
+            ${!phase1Complete ? '<i data-lucide="lock" class="phase-status text-muted"></i>' : ''}
+          </div>
+          ${phase1Complete ? `
+            <div class="form-group">
+              <label for="solution-input">
+                <span class="label-hint">How would you fix this?</span>
+              </label>
+              <textarea
+                id="solution-input"
+                placeholder="e.g., Use try/finally blocks to ensure connections are always released, or implement connection pool timeouts..."
+                rows="3"
+              ></textarea>
+            </div>
+            <button class="btn btn-primary" id="btn-submit-phase2">
+              <i data-lucide="send"></i> Submit Solution
+            </button>
+          ` : `
+            <p class="phase-locked-message">
+              <i data-lucide="info" class="inline-icon"></i>
+              Unlock by identifying the root cause first
+            </p>
+          `}
+        </div>
+
+        <div class="diagnosis-actions-secondary">
           <button class="btn btn-ghost" id="btn-give-up">
             <i data-lucide="flag"></i> Give Up & See Solution
           </button>
@@ -245,7 +296,33 @@ function renderDiagnosisSection(caseData, progress) {
 
       <div id="diagnosis-feedback" class="diagnosis-feedback hidden"></div>
 
-      <p class="attempt-counter"><i data-lucide="hash" class="inline-icon"></i> Attempts: ${progress.attempts}</p>
+      <!-- Score Estimation Panel -->
+      <div class="score-panel">
+        <div class="score-estimate">
+          <i data-lucide="zap" class="inline-icon"></i>
+          <span>Score Estimate: </span>
+          <span id="score-value" class="score-value">---</span>
+          <span> pts</span>
+        </div>
+        <div class="score-stats">
+          <span class="stat" id="stat-time">
+            <i data-lucide="clock" class="inline-icon"></i>
+            <span id="time-display">0:00</span>
+          </span>
+          <span class="stat">
+            <i data-lucide="folder-open" class="inline-icon"></i>
+            Clues: ${progress.cluesRevealed}/${caseData.totalClues}
+          </span>
+          <span class="stat">
+            <i data-lucide="lightbulb" class="inline-icon"></i>
+            Hints: <span id="hints-count">${progress.hintsViewed?.length || 0}</span>
+          </span>
+          <span class="stat">
+            <i data-lucide="rotate-ccw" class="inline-icon"></i>
+            Attempts: ${progress.rootCauseAttempts || 0}
+          </span>
+        </div>
+      </div>
     </section>
   `;
 }
@@ -287,12 +364,12 @@ function renderChatPanel(caseData) {
  * Attach event handlers
  */
 function attachEventHandlers(container, caseData, progress, handlers) {
-  const { onBack, onRevealClue, onSubmitDiagnosis, onGiveUp, onSendMessage } = handlers;
+  const { onBack, onRevealClue, onSubmitDiagnosis, onGiveUp, onSendMessage, onHintViewed, onUpdateScore } = handlers;
 
   // Back button
   container.querySelector('#btn-back')?.addEventListener('click', onBack);
 
-  // Show hint buttons
+  // Show hint buttons - now with tracking
   container.querySelectorAll('.btn-show-hint').forEach(btn => {
     btn.addEventListener('click', (e) => {
       e.preventDefault();
@@ -302,22 +379,56 @@ function attachEventHandlers(container, caseData, progress, handlers) {
       if (hintEl) {
         hintEl.classList.remove('hidden');
         btn.style.display = 'none';
+        // Track hint view for scoring
+        if (onHintViewed) {
+          const newCount = onHintViewed(hintId);
+          // Update hints count in UI
+          const hintsCountEl = container.querySelector('#hints-count');
+          if (hintsCountEl) {
+            hintsCountEl.textContent = newCount;
+          }
+        }
       }
     });
   });
 
   // Reveal clue button
-  container.querySelector('#btn-reveal-clue')?.addEventListener('click', onRevealClue);
+  container.querySelector('#btn-reveal-clue')?.addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onRevealClue();
+  });
 
-  // Submit diagnosis
-  const submitBtn = container.querySelector('#btn-submit-diagnosis');
+  // Phase 1: Submit Root Cause
+  const phase1Btn = container.querySelector('#btn-submit-phase1');
   const diagnosisInput = container.querySelector('#diagnosis-input');
 
-  submitBtn?.addEventListener('click', () => {
+  phase1Btn?.addEventListener('click', () => {
     const diagnosis = diagnosisInput?.value?.trim();
-    if (diagnosis) {
-      onSubmitDiagnosis(diagnosis);
+
+    if (!diagnosis) {
+      alert('Please describe the root cause of the incident.');
+      diagnosisInput?.focus();
+      return;
     }
+
+    onSubmitDiagnosis({ phase: 1, diagnosis, proposedSolution: '' });
+  });
+
+  // Phase 2: Submit Solution
+  const phase2Btn = container.querySelector('#btn-submit-phase2');
+  const solutionInput = container.querySelector('#solution-input');
+
+  phase2Btn?.addEventListener('click', () => {
+    const proposedSolution = solutionInput?.value?.trim();
+
+    if (!proposedSolution) {
+      alert('Please describe how you would fix this issue.');
+      solutionInput?.focus();
+      return;
+    }
+
+    onSubmitDiagnosis({ phase: 2, diagnosis: '', proposedSolution });
   });
 
   // Give up button
@@ -350,6 +461,21 @@ function attachEventHandlers(container, caseData, progress, handlers) {
       sendMessage();
     }
   });
+
+  // Start score update interval
+  if (onUpdateScore && !progress.solved && !progress.gaveUp) {
+    // Initial update
+    onUpdateScore();
+    // Update every second
+    const scoreInterval = setInterval(() => {
+      const scoreEl = container.querySelector('#score-value');
+      if (!scoreEl || !document.body.contains(scoreEl)) {
+        clearInterval(scoreInterval);
+        return;
+      }
+      onUpdateScore();
+    }, 1000);
+  }
 }
 
 /**
@@ -424,4 +550,32 @@ function escapeHtml(text) {
   const div = document.createElement('div');
   div.textContent = text;
   return div.innerHTML;
+}
+
+/**
+ * Update the score display in real-time
+ */
+export function updateScoreDisplay(container, score, elapsedSeconds) {
+  const scoreEl = container.querySelector('#score-value');
+  const timeEl = container.querySelector('#time-display');
+
+  if (scoreEl) {
+    scoreEl.textContent = score;
+  }
+
+  if (timeEl && elapsedSeconds !== undefined) {
+    const minutes = Math.floor(elapsedSeconds / 60);
+    const seconds = elapsedSeconds % 60;
+    timeEl.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+  }
+}
+
+/**
+ * Update the hints count display
+ */
+export function updateHintsCount(container, count) {
+  const hintsEl = container.querySelector('#hints-count');
+  if (hintsEl) {
+    hintsEl.textContent = count;
+  }
 }

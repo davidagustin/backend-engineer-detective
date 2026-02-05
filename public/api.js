@@ -32,13 +32,19 @@ export async function fetchCase(caseId, cluesRevealed = 2) {
 }
 
 /**
- * Check a diagnosis attempt
+ * Check a diagnosis attempt (two-phase system)
+ * @param {string} caseId - The case ID
+ * @param {number} phase - Phase 1 (root cause) or Phase 2 (solution)
+ * @param {string} diagnosis - The user's root cause analysis (phase 1)
+ * @param {string} proposedSolution - The user's proposed fix (phase 2)
+ * @param {number} attemptCount - Number of attempts made
+ * @param {number} cluesRevealed - Number of clues revealed
  */
-export async function checkDiagnosis(caseId, diagnosis, attemptCount, cluesRevealed) {
+export async function checkDiagnosis(caseId, phase, diagnosis, proposedSolution, attemptCount, cluesRevealed) {
   const response = await fetch(`${API_BASE}/cases/${caseId}/check`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ diagnosis, attemptCount, cluesRevealed }),
+    body: JSON.stringify({ phase, diagnosis, proposedSolution, attemptCount, cluesRevealed }),
   });
   if (!response.ok) {
     throw new Error('Failed to check diagnosis');

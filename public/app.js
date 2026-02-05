@@ -11,7 +11,8 @@ import {
   showDiagnosisFeedback,
   addChatMessage,
   addStreamingMessage,
-  finalizeStreamingMessage
+  finalizeStreamingMessage,
+  updateScoreDisplay
 } from './components/case-view.js';
 import { renderSolution } from './components/solution.js';
 
@@ -98,6 +99,9 @@ async function showCaseView(caseId) {
     // Get progress for this case
     const progress = state.getCaseProgress(appState, caseId);
 
+    // Start investigation timer if not already started
+    state.startInvestigation(appState, caseId);
+
     // Fetch case data with current clue level
     currentCaseData = await api.fetchCase(caseId, progress.cluesRevealed);
 
@@ -110,9 +114,11 @@ async function showCaseView(caseId) {
         window.location.hash = '';
       },
       onRevealClue: () => handleRevealClue(caseId),
-      onSubmitDiagnosis: (diagnosis) => handleSubmitDiagnosis(caseId, diagnosis),
+      onSubmitDiagnosis: (submission) => handleSubmitDiagnosis(caseId, submission),
       onGiveUp: () => handleGiveUp(caseId),
       onSendMessage: (message) => handleSendMessage(caseId, message),
+      onHintViewed: (hintId) => handleHintViewed(caseId, hintId),
+      onUpdateScore: () => handleUpdateScore(caseId),
     });
 
     // Restore chat history in UI
@@ -155,39 +161,74 @@ async function showSolutionView(caseId) {
  * Handle revealing a new clue
  */
 async function handleRevealClue(caseId) {
+  // Save scroll position before re-rendering
+  const scrollPosition = window.scrollY;
+
   const progress = state.getCaseProgress(appState, caseId);
   const newClueCount = state.revealClue(appState, caseId, currentCaseData.totalClues);
 
   // Reload the case view with the new clue
   await showCaseView(caseId);
+
+  // Restore scroll position after render
+  requestAnimationFrame(() => {
+    window.scrollTo(0, scrollPosition);
+  });
 }
 
 /**
- * Handle submitting a diagnosis
+ * Handle submitting a diagnosis (two-phase system)
+ * @param {string} caseId - The case ID
+ * @param {Object} submission - Object with phase, diagnosis, and proposedSolution
  */
-async function handleSubmitDiagnosis(caseId, diagnosis) {
+async function handleSubmitDiagnosis(caseId, { phase, diagnosis, proposedSolution }) {
   const progress = state.getCaseProgress(appState, caseId);
-  const attempts = state.recordAttempt(appState, caseId);
+
+  // Track attempts based on phase
+  let attemptCount;
+  if (phase === 1) {
+    attemptCount = state.recordRootCauseAttempt(appState, caseId);
+  } else {
+    attemptCount = state.recordAttempt(appState, caseId);
+  }
 
   try {
     const result = await api.checkDiagnosis(
       caseId,
+      phase,
       diagnosis,
-      attempts,
+      proposedSolution,
+      attemptCount,
       progress.cluesRevealed
     );
 
     // Show feedback
     showDiagnosisFeedback(mainContainer, result);
 
-    // If correct, mark as solved and show solution
-    if (result.correct) {
-      state.markSolved(appState, caseId);
+    if (phase === 1) {
+      // Phase 1: Root cause evaluation
+      if (result.correct) {
+        // Mark phase 1 complete and re-render to show phase 2
+        state.markRootCauseCorrect(appState, caseId, diagnosis);
 
-      // Brief delay before showing solution
-      setTimeout(() => {
-        window.location.hash = `case/${caseId}/solution`;
-      }, 2000);
+        // Brief delay then re-render to unlock phase 2
+        setTimeout(() => {
+          showCaseView(caseId);
+        }, 1500);
+      }
+    } else {
+      // Phase 2: Solution evaluation
+      if (result.correct) {
+        // Calculate and save final score
+        const updatedProgress = state.getCaseProgress(appState, caseId);
+        const finalScore = state.calculateScore(updatedProgress, currentCaseData.difficulty);
+        state.markSolved(appState, caseId, finalScore);
+
+        // Brief delay before showing solution
+        setTimeout(() => {
+          window.location.hash = `case/${caseId}/solution`;
+        }, 2000);
+      }
     }
   } catch (error) {
     console.error('Failed to check diagnosis:', error);
@@ -197,6 +238,31 @@ async function handleSubmitDiagnosis(caseId, diagnosis) {
       feedback: '❌ Failed to check diagnosis. Please try again.',
     });
   }
+}
+
+/**
+ * Handle hint view for scoring
+ */
+function handleHintViewed(caseId, hintId) {
+  return state.recordHintView(appState, caseId, hintId);
+}
+
+/**
+ * Handle score update (called every second)
+ */
+function handleUpdateScore(caseId) {
+  if (!currentCaseData) return;
+
+  const progress = state.getCaseProgress(appState, caseId);
+  const estimatedScore = state.estimateCurrentScore(progress, currentCaseData.difficulty);
+
+  // Calculate elapsed time
+  let elapsedSeconds = 0;
+  if (progress.startTime) {
+    elapsedSeconds = Math.floor((Date.now() - progress.startTime) / 1000);
+  }
+
+  updateScoreDisplay(mainContainer, estimatedScore, elapsedSeconds);
 }
 
 /**
