@@ -1,22 +1,22 @@
-# 🔍 Backend Engineer Detective
+# Backend Engineer Detective
 
-**Solve 22 production incidents from PlayStation-scale scenarios.**
+**Solve 121 production incidents from PlayStation-scale scenarios.**
 
 An interactive detective game where you investigate real-world backend engineering incidents. Analyze logs, metrics, code, and testimonies to diagnose root causes — with an AI mentor to guide your investigation.
 
-### 🎮 [Play Now → backend-engineer-detective.davidsyagustin.workers.dev](https://backend-engineer-detective.davidsyagustin.workers.dev)
+### [Play Now → backend-engineer-detective.davidsyagustin.workers.dev](https://backend-engineer-detective.davidsyagustin.workers.dev)
 
 ![Theme](https://img.shields.io/badge/theme-detective%20noir-black)
-![Cases](https://img.shields.io/badge/cases-22-e94560)
+![Cases](https://img.shields.io/badge/cases-121-e94560)
 ![Difficulty](https://img.shields.io/badge/difficulty-junior%20→%20principal-f0a500)
 ![Platform](https://img.shields.io/badge/platform-Cloudflare%20Workers-F6821F)
 [![Live Demo](https://img.shields.io/badge/demo-live-brightgreen)](https://backend-engineer-detective.davidsyagustin.workers.dev)
 
 ---
 
-## 🎮 How It Works
+## How It Works
 
-1. **Pick a Case** — Choose from 22 incidents across database, caching, networking, auth, memory, and distributed systems
+1. **Pick a Case** — Choose from 121 incidents across 11 categories
 2. **Investigate** — Examine clues progressively: error logs, metrics dashboards, code snippets, config files, and engineer testimonies
 3. **Chat with Detective Claude** — Your AI mentor asks Socratic questions to guide your thinking (without giving away the answer)
 4. **Submit Your Diagnosis** — Describe the root cause in your own words
@@ -24,36 +24,36 @@ An interactive detective game where you investigate real-world backend engineeri
 
 ---
 
-## 🗂️ The 22 Cases
+## Case Categories
 
-| # | Case | Difficulty | Category |
-|---|------|------------|----------|
-| 1 | The Database Disappearing Act | Mid | Database |
-| 2 | The Black Friday Disaster | Senior | Distributed |
-| 3 | The Memory Explosion Mystery | Mid | Caching |
-| 4 | The Ghost Users Problem | Junior | Caching |
-| 5 | The Infinite Loop Incident | Senior | Auth |
-| 6 | The Mysterious Memory Leak | Principal | Memory |
-| 7 | The Silent Authentication Crisis | Mid | Auth |
-| 8 | The Vanishing Achievements | Junior | Caching |
-| 9 | The Weekend Warriors Crisis | Mid | Caching |
-| 10 | The Mysterious Slow Logins | Mid | Database |
-| 11 | The Phantom Friend Requests | Junior | Database |
-| 12 | The Midnight Data Swap | Senior | Distributed |
-| 13 | The Database Inconsistency | Mid | Database |
-| 14 | The Invisible API | Junior | Networking |
-| 15 | The Vanishing Multiplayer Matches | Senior | Networking |
-| 16 | The Invisible Traffic Spike | Principal | Distributed |
-| 17 | The Kubernetes Pod Mystery | Mid | Distributed |
-| 18 | The Kafka Consumer Catastrophe | Senior | Distributed |
-| 19 | The GraphQL Performance Nightmare | Mid | Database |
-| 20 | The WebSocket Memory Drain | Senior | Memory |
-| 21 | The Feature Flag Fiasco | Mid | Distributed |
-| 22 | The Elasticsearch Indexing Storm | Senior | Distributed |
+| Category | Cases | Topics |
+|----------|-------|--------|
+| **Core Backend** | 1-22 | Database pooling, caching, auth, memory, distributed systems |
+| **AWS Infrastructure** | 23-32 | Lambda, S3, DynamoDB, RDS, SQS, CloudFront, ECS, ALB, SNS |
+| **Databases Deep Dive** | 33-42 | PostgreSQL, MongoDB, Cassandra, MySQL, Redis Cluster, CockroachDB |
+| **Message Queues** | 43-52 | RabbitMQ, Kafka, NATS, Redis Pub/Sub, Pulsar, Celery, Kinesis, Bull |
+| **Kubernetes & DevOps** | 53-62 | HPA, Istio, Helm, CrashLoopBackOff, Service Mesh, PVC, Docker, ArgoCD |
+| **Auth & API Design** | 63-72 | JWT, OAuth2, CORS, Rate Limiting, gRPC, REST, GraphQL, mTLS |
+| **Monitoring** | 73-82 | Prometheus, Datadog, ELK, Jaeger, PagerDuty, Grafana, OpenTelemetry |
+| **Language Runtimes** | 83-92 | Node.js, Java GC, Go, Python GIL, Rust async, PHP-FPM, Ruby, .NET, JVM |
+| **Load Balancing** | 93-102 | Nginx, HAProxy, TCP, DNS, TLS, HTTP/2, BGP, MTU, WebSocket proxies |
+| **Resilience Patterns** | 103-111 | Circuit breakers, retries, bulkheads, sagas, CQRS, idempotency, 2PC |
+| **DevOps & Deployment** | 113-122 | CI/CD, blue-green, canary, migrations, feature flags, Terraform, GitOps |
 
 ---
 
-## 🚀 Quick Start
+## Difficulty Levels
+
+| Level | Description |
+|-------|-------------|
+| **Junior** | Common issues with clear symptoms |
+| **Mid** | Multi-component problems requiring system thinking |
+| **Senior** | Complex distributed system failures |
+| **Principal** | Subtle, high-impact incidents requiring deep expertise |
+
+---
+
+## Quick Start
 
 ### Prerequisites
 
@@ -89,7 +89,7 @@ npm run deploy
 
 ---
 
-## 🏗️ Architecture
+## Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
@@ -107,7 +107,7 @@ npm run deploy
 │                   CLOUDFLARE WORKER (src/)                         │
 │  GET  /api/cases           → List all cases                        │
 │  GET  /api/cases/:id       → Get case with clues (progressive)     │
-│  POST /api/cases/:id/check → Check diagnosis guess                 │
+│  POST /api/cases/:id/check → Check diagnosis (LLM-evaluated)       │
 │  POST /api/chat            → AI chat with case context (SSE)       │
 └─────────────────────────────────────────────────────────────────────┘
 ```
@@ -117,11 +117,11 @@ npm run deploy
 - **Runtime:** Cloudflare Workers (TypeScript)
 - **AI:** Workers AI (Llama 3.1 8B) with SSE streaming
 - **Frontend:** Vanilla HTML/JS/CSS (no framework, no build step)
-- **Styling:** Detective noir theme with Prism.js syntax highlighting
+- **Styling:** Detective noir theme with Lucide icons and Prism.js syntax highlighting
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 backend-engineer-detective/
@@ -132,7 +132,7 @@ backend-engineer-detective/
 │   ├── state.js                # localStorage progress tracking
 │   ├── api.js                  # API client with SSE support
 │   └── components/
-│       ├── case-list.js        # Case selection grid
+│       ├── case-list.js        # Case selection grid with filtering
 │       ├── case-view.js        # Investigation interface
 │       └── solution.js         # Solution reveal
 │
@@ -140,11 +140,11 @@ backend-engineer-detective/
 │   ├── index.ts                # Main worker with API routes
 │   ├── types.ts                # TypeScript interfaces
 │   ├── cases/
-│   │   ├── index.ts            # Case registry
-│   │   └── data/               # 16 case definition files
+│   │   ├── index.ts            # Case registry (121 cases)
+│   │   └── data/               # Case definition files (01-122)
 │   └── utils/
 │       ├── prompt-builder.ts   # AI system prompts
-│       └── diagnosis-matcher.ts # Fuzzy answer matching
+│       └── diagnosis-matcher.ts # LLM-based answer evaluation
 │
 ├── wrangler.jsonc              # Cloudflare config
 ├── tsconfig.json               # TypeScript config
@@ -153,7 +153,7 @@ backend-engineer-detective/
 
 ---
 
-## 🔌 API Reference
+## API Reference
 
 ### List All Cases
 
@@ -185,6 +185,11 @@ Content-Type: application/json
 }
 ```
 
+Response includes:
+- `isCorrect`: boolean
+- `score`: number (0-100)
+- `feedback`: string (LLM-generated evaluation)
+
 ### Chat with AI
 
 ```http
@@ -199,14 +204,14 @@ Content-Type: application/json
 
 ---
 
-## 🎨 Features
+## Features
 
 ### Progressive Clue Reveal
-- 📊 **Metrics** — Dashboards, graphs, numbers
-- 📜 **Logs** — Error messages, stack traces
-- 💻 **Code** — Source code snippets
-- ⚙️ **Config** — Configuration files
-- 💬 **Testimony** — Engineer statements
+- Metrics — Dashboards, graphs, numbers
+- Logs — Error messages, stack traces
+- Code — Source code snippets
+- Config — Configuration files
+- Testimony — Engineer statements
 
 ### AI Detective Mentor
 - Asks probing questions
@@ -214,49 +219,52 @@ Content-Type: application/json
 - Never reveals the answer directly
 - Celebrates good deductions
 
-### Progress Tracking
-- Cases solved
-- Clues revealed per case
-- Chat history
-- Attempt counts
+### Two-Phase Diagnosis
+- Phase 1: Identify the root cause
+- Phase 2: Explain why it happened
+- LLM-evaluated scoring (0-100)
+
+### Filtering System
+- Filter by category
+- Filter by difficulty
+- Track solved cases
 
 ---
 
-## 📚 Learning Outcomes
+## Learning Outcomes
 
-| Concept | Cases |
-|---------|-------|
-| Connection pooling | #1, #10 |
-| Message queue backpressure | #2 |
-| Redis streams & TTL | #3, #8 |
-| Presence systems & heartbeats | #4 |
-| Token management | #5 |
-| Native memory & fragmentation | #6 |
-| Certificate chains & CDN | #7, #14 |
-| Cache warming | #9 |
-| SQL LIKE wildcards | #10 |
-| Read-after-write consistency | #13 |
-| UDP NAT traversal | #15 |
-| GeoDNS & traffic routing | #16 |
+Each case teaches specific debugging skills:
+
+| Domain | Concepts |
+|--------|----------|
+| **Databases** | Connection pooling, replication lag, vacuum, locking, sharding |
+| **Caching** | TTL, invalidation, thundering herd, hot keys |
+| **Messaging** | Backpressure, consumer lag, rebalancing, exactly-once |
+| **Kubernetes** | HPA, probes, resource limits, PVC, service mesh |
+| **Observability** | Cardinality, sampling, alert fatigue, trace context |
+| **Networking** | DNS, TLS, load balancing, circuit breakers, timeouts |
+| **Resilience** | Retries, bulkheads, sagas, idempotency, 2PC |
 
 ---
 
-## 🤝 Contributing
+## Contributing
 
-Contributions welcome! See the [wiki](../../wiki) for detailed guides on:
-- [Adding New Cases](../../wiki/Adding-New-Cases)
-- [API Documentation](../../wiki/API-Documentation)
-- [Architecture Deep Dive](../../wiki/Architecture)
+Contributions welcome! When adding cases:
+
+1. Create a new file in `src/cases/data/`
+2. Follow the existing case structure (title, crisis, symptoms, clues, solution)
+3. Register the case in `src/cases/index.ts`
+4. Test with `npm run dev`
 
 ---
 
-## 📄 License
+## License
 
 MIT License
 
 ---
 
 <p align="center">
-  <strong>🔍 Can you solve all 16 cases?</strong><br>
+  <strong>Can you solve all 121 cases?</strong><br>
   <em>Put your debugging skills to the test.</em>
 </p>
