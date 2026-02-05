@@ -283,7 +283,7 @@ export function showLoading(container) {
   container.innerHTML = `
     <div class="loading-state">
       <div class="loading-spinner"></div>
-      <p>Loading case files...</p>
+      <p>Loading cases...</p>
     </div>
   `;
 }
@@ -297,7 +297,7 @@ export function showError(container, message) {
       <i data-lucide="alert-triangle" class="error-icon"></i>
       <h2>Something went wrong</h2>
       <p>${message}</p>
-      <button class="btn btn-primary" onclick="location.reload()">Try Again</button>
+      <button class="btn btn-primary" onclick="location.reload()">Reload Cases</button>
     </div>
   `;
   if (window.lucide) {

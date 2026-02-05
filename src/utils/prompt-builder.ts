@@ -87,7 +87,7 @@ Encourage them to pick a case and start investigating!`;
 export function buildVictoryPrompt(caseData: DetectiveCase): string {
 	return `${DETECTIVE_PERSONA}
 
-🎉 THE USER JUST SOLVED THE CASE! 🎉
+THE USER JUST SOLVED THE CASE!
 
 Case: "${caseData.title}"
 Their diagnosis was correct.

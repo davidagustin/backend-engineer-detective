@@ -65,14 +65,14 @@ function renderCaseHeader(caseData, onBack) {
 
   return `
     <header class="case-header">
-      <button class="btn-back" id="btn-back"><i data-lucide="arrow-left"></i> Back to Cases</button>
+      <button class="btn-back" id="btn-back" aria-label="Back to case list"><i data-lucide="arrow-left"></i> Back to Cases</button>
       <div class="case-title-section">
         <h1>${caseData.title}</h1>
         <p class="case-subtitle">${caseData.subtitle}</p>
       </div>
       <div class="case-badges">
         <span class="badge badge-${caseData.difficulty}">${difficultyLabels[caseData.difficulty]}</span>
-        <span class="badge badge-category">${caseData.category}</span>
+        <span class="badge badge-category">${caseData.category.charAt(0).toUpperCase() + caseData.category.slice(1)}</span>
       </div>
     </header>
   `;
@@ -140,7 +140,7 @@ function renderCluesSection(caseData, progress) {
     <section class="clues-section">
       <div class="clues-header">
         <h2><i data-lucide="folder-open" class="section-icon"></i> Evidence Board</h2>
-        <span class="clue-counter">${cluesRevealed}/${totalClues} clues revealed</span>
+        <span class="clue-counter">${cluesRevealed} of ${totalClues} clues examined</span>
       </div>
 
       <div class="clues-board">
@@ -155,7 +155,7 @@ function renderCluesSection(caseData, progress) {
           </div>
         ` : `
           <div class="all-clues-revealed">
-            <p><i data-lucide="check-check" class="inline-icon"></i> All evidence has been examined</p>
+            <p><i data-lucide="check-circle-2" class="inline-icon"></i> All evidence examined</p>
           </div>
         `}
       </div>
@@ -249,7 +249,7 @@ function renderDiagnosisSection(caseData, progress) {
               </label>
               <textarea
                 id="diagnosis-input"
-                placeholder="e.g., Connection pool exhaustion due to connections not being released after use..."
+                placeholder="Describe what you think is causing this incident..."
                 rows="3"
               ></textarea>
             </div>
@@ -272,7 +272,7 @@ function renderDiagnosisSection(caseData, progress) {
               </label>
               <textarea
                 id="solution-input"
-                placeholder="e.g., Use try/finally blocks to ensure connections are always released, or implement connection pool timeouts..."
+                placeholder="Explain how you would fix this issue..."
                 rows="3"
               ></textarea>
             </div>
@@ -282,14 +282,14 @@ function renderDiagnosisSection(caseData, progress) {
           ` : `
             <p class="phase-locked-message">
               <i data-lucide="info" class="inline-icon"></i>
-              Unlock by identifying the root cause first
+              Complete Phase 1 to unlock
             </p>
           `}
         </div>
 
         <div class="diagnosis-actions-secondary">
           <button class="btn btn-ghost" id="btn-give-up">
-            <i data-lucide="flag"></i> Give Up & See Solution
+            <i data-lucide="flag"></i> Give Up & View Solution
           </button>
         </div>
       </div>
@@ -351,10 +351,10 @@ function renderChatPanel(caseData) {
       <div class="chat-input-area">
         <textarea
           id="chat-input"
-          placeholder="Ask Detective Claude for guidance..."
+          placeholder="Share your thoughts with Detective Claude..."
           rows="2"
         ></textarea>
-        <button class="btn btn-chat" id="btn-send-message"><i data-lucide="send"></i></button>
+        <button class="btn btn-chat" id="btn-send-message" aria-label="Send message"><i data-lucide="send"></i></button>
       </div>
     </div>
   `;
