@@ -6,7 +6,7 @@
  *
  * @license MIT
  */
-import { Env, ChatMessage, ChatRequest, DiagnosisResult } from "./types";
+import { Env, ChatMessage, ChatRequest, DiagnosisResult, Solution } from "./types";
 import { getAllCaseSummaries, getCaseView, getCase, getCaseSolution } from "./cases";
 import { matchDiagnosis, generateHint } from "./utils/diagnosis-matcher";
 import { buildCaseContextPrompt, buildGeneralPrompt, buildVictoryPrompt } from "./utils/prompt-builder";
@@ -55,7 +55,7 @@ export default {
 			const checkMatch = url.pathname.match(/^\/api\/cases\/([^/]+)\/check$/);
 			if (checkMatch && request.method === "POST") {
 				const caseId = checkMatch[1];
-				return handleCheckDiagnosis(caseId, request);
+				return handleCheckDiagnosis(caseId, request, env);
 			}
 
 			// Get solution (for give up)
@@ -131,9 +131,9 @@ function handleGetCase(caseId: string, cluesRevealed: number): Response {
 }
 
 /**
- * POST /api/cases/:id/check - Check a diagnosis attempt
+ * POST /api/cases/:id/check - Check a diagnosis attempt using LLM evaluation
  */
-async function handleCheckDiagnosis(caseId: string, request: Request): Promise<Response> {
+async function handleCheckDiagnosis(caseId: string, request: Request, env: Env): Promise<Response> {
 	const caseData = getCase(caseId);
 	if (!caseData) {
 		return jsonResponse({ error: "Case not found" }, 404);
@@ -146,7 +146,8 @@ async function handleCheckDiagnosis(caseId: string, request: Request): Promise<R
 		return jsonResponse({ error: "Diagnosis is required" }, 400);
 	}
 
-	const result = matchDiagnosis(diagnosis, caseData.solution);
+	// Use LLM to evaluate the diagnosis
+	const result = await evaluateDiagnosisWithLLM(env, diagnosis, caseData.solution);
 
 	// Add hint if not correct
 	if (!result.correct) {
@@ -158,6 +159,100 @@ async function handleCheckDiagnosis(caseId: string, request: Request): Promise<R
 	}
 
 	return jsonResponse(result);
+}
+
+/**
+ * Use LLM to evaluate if the user's diagnosis is correct
+ */
+async function evaluateDiagnosisWithLLM(
+	env: Env,
+	userDiagnosis: string,
+	solution: Solution
+): Promise<DiagnosisResult> {
+	const systemPrompt = `You are an expert evaluator for a backend engineering debugging game. Your job is to determine if the user's diagnosis matches the actual root cause of an incident.
+
+You must respond with ONLY a valid JSON object in this exact format, no other text:
+{"verdict": "correct" | "partial" | "incorrect", "explanation": "brief explanation", "matchedConcepts": ["concept1", "concept2"]}
+
+CORRECT: The user has identified the core root cause, even if they use different terminology or phrasing. They understand WHY the problem occurred.
+
+PARTIAL: The user is on the right track - they've identified related symptoms or contributing factors, but haven't pinpointed the exact root cause.
+
+INCORRECT: The user's diagnosis is unrelated or fundamentally misunderstands the problem.
+
+Be generous - if the user demonstrates understanding of the core issue, mark it as correct even if the wording differs from the official answer.`;
+
+	const userPrompt = `## Actual Root Cause
+${solution.diagnosis}
+
+## Full Explanation
+${solution.rootCause}
+
+## Key Concepts
+${solution.keywords.join(", ")}
+
+---
+
+## User's Diagnosis
+"${userDiagnosis}"
+
+---
+
+Evaluate if the user's diagnosis demonstrates understanding of the root cause. Respond with ONLY the JSON object.`;
+
+	try {
+		const response = await env.AI.run(MODEL_ID, {
+			messages: [
+				{ role: "system", content: systemPrompt },
+				{ role: "user", content: userPrompt },
+			],
+			max_tokens: 256,
+			temperature: 0.1, // Low temperature for consistent evaluation
+		}) as { response?: string };
+
+		// Parse the LLM response
+		const responseText = response.response || "";
+
+		// Extract JSON from response (handle potential markdown code blocks)
+		let jsonStr = responseText.trim();
+		if (jsonStr.startsWith("```")) {
+			jsonStr = jsonStr.replace(/```json?\n?/g, "").replace(/```/g, "").trim();
+		}
+
+		const evaluation = JSON.parse(jsonStr) as {
+			verdict: "correct" | "partial" | "incorrect";
+			explanation: string;
+			matchedConcepts: string[];
+		};
+
+		if (evaluation.verdict === "correct") {
+			return {
+				correct: true,
+				partial: false,
+				feedback: `🎉 Case Closed! ${evaluation.explanation}`,
+				matchedKeywords: evaluation.matchedConcepts || [],
+				solution,
+			};
+		} else if (evaluation.verdict === "partial") {
+			return {
+				correct: false,
+				partial: true,
+				feedback: `🔍 You're on the right track! ${evaluation.explanation}`,
+				matchedKeywords: evaluation.matchedConcepts || [],
+			};
+		} else {
+			return {
+				correct: false,
+				partial: false,
+				feedback: `❌ ${evaluation.explanation || "That doesn't match the evidence. Review the clues and try again."}`,
+				matchedKeywords: evaluation.matchedConcepts || [],
+			};
+		}
+	} catch (error) {
+		console.error("LLM evaluation error:", error);
+		// Fallback to keyword matching if LLM fails
+		return matchDiagnosis(userDiagnosis, solution);
+	}
 }
 
 /**
