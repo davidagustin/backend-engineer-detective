@@ -172,17 +172,24 @@ async function handleRevealClue(caseId) {
   // Save scroll position before re-rendering
   const scrollPosition = window.scrollY;
 
+  // Lock scroll during re-render by fixing the body position
+  const scrollX = window.scrollX;
+  document.body.style.position = 'fixed';
+  document.body.style.top = `-${scrollPosition}px`;
+  document.body.style.left = `-${scrollX}px`;
+  document.body.style.width = '100%';
+
   state.revealClue(appState, caseId, currentCaseData.totalClues);
 
   // Reload the case view with the new clue (skip loading to preserve scroll)
   await showCaseView(caseId, { skipLoading: true });
 
-  // Restore scroll position after render (double RAF ensures DOM is ready)
-  requestAnimationFrame(() => {
-    requestAnimationFrame(() => {
-      window.scrollTo(0, scrollPosition);
-    });
-  });
+  // Unlock scroll and restore position
+  document.body.style.position = '';
+  document.body.style.top = '';
+  document.body.style.left = '';
+  document.body.style.width = '';
+  window.scrollTo(scrollX, scrollPosition);
 }
 
 /**
