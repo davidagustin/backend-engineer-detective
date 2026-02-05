@@ -183,7 +183,12 @@ function renderClue(clue, index) {
         <span class="clue-type badge">${clue.type}</span>
       </div>
       <div class="clue-content">${content}</div>
-      ${clue.hint ? `<div class="clue-hint">💡 ${clue.hint}</div>` : ''}
+      ${clue.hint ? `
+        <div class="clue-hint-container" data-hint-id="${clue.id}">
+          <button type="button" class="btn-show-hint" data-hint-id="${clue.id}">💡 Show Hint</button>
+          <div class="clue-hint hidden" data-hint-id="${clue.id}">${clue.hint}</div>
+        </div>
+      ` : ''}
     </div>
   `;
 }
@@ -281,6 +286,20 @@ function attachEventHandlers(container, caseData, progress, handlers) {
 
   // Back button
   container.querySelector('#btn-back')?.addEventListener('click', onBack);
+
+  // Show hint buttons
+  container.querySelectorAll('.btn-show-hint').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const hintId = btn.dataset.hintId;
+      const hintEl = container.querySelector(`.clue-hint[data-hint-id="${hintId}"]`);
+      if (hintEl) {
+        hintEl.classList.remove('hidden');
+        btn.style.display = 'none';
+      }
+    });
+  });
 
   // Reveal clue button
   container.querySelector('#btn-reveal-clue')?.addEventListener('click', onRevealClue);
