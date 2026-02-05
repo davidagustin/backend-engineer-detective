@@ -12,14 +12,14 @@ const eventTypeStyles = {
 };
 
 /**
- * Clue type icons
+ * Clue type icons using Lucide icon names
  */
 const clueTypeIcons = {
-  metrics: '📊',
-  logs: '📜',
-  code: '💻',
-  config: '⚙️',
-  testimony: '💬',
+  metrics: 'bar-chart-3',
+  logs: 'scroll-text',
+  code: 'code-2',
+  config: 'settings',
+  testimony: 'message-circle',
 };
 
 /**
@@ -43,6 +43,11 @@ export function renderCaseView(container, caseData, progress, handlers) {
     </div>
   `;
 
+  // Initialize Lucide icons
+  if (window.lucide) {
+    window.lucide.createIcons();
+  }
+
   // Attach event handlers
   attachEventHandlers(container, caseData, progress, handlers);
 }
@@ -60,7 +65,7 @@ function renderCaseHeader(caseData, onBack) {
 
   return `
     <header class="case-header">
-      <button class="btn-back" id="btn-back">← Back to Cases</button>
+      <button class="btn-back" id="btn-back"><i data-lucide="arrow-left"></i> Back to Cases</button>
       <div class="case-title-section">
         <h1>${caseData.title}</h1>
         <p class="case-subtitle">${caseData.subtitle}</p>
@@ -79,13 +84,13 @@ function renderCaseHeader(caseData, onBack) {
 function renderCrisisSection(crisis) {
   return `
     <section class="crisis-section">
-      <h2>🚨 The Crisis</h2>
+      <h2><i data-lucide="alert-circle" class="section-icon"></i> The Crisis</h2>
       <p class="crisis-description">${crisis.description}</p>
       <div class="impact-box">
-        <strong>Impact:</strong> ${crisis.impact}
+        <strong><i data-lucide="trending-down" class="inline-icon"></i> Impact:</strong> ${crisis.impact}
       </div>
       <div class="timeline">
-        <h3>Timeline</h3>
+        <h3><i data-lucide="clock" class="inline-icon"></i> Timeline</h3>
         <ul class="timeline-list">
           ${crisis.timeline.map(event => `
             <li class="timeline-item ${eventTypeStyles[event.type || 'normal']}">
@@ -105,16 +110,16 @@ function renderCrisisSection(crisis) {
 function renderSymptomsSection(symptoms) {
   return `
     <section class="symptoms-section">
-      <h2>🔎 Symptoms</h2>
+      <h2><i data-lucide="scan-search" class="section-icon"></i> Symptoms</h2>
       <div class="symptoms-grid">
         <div class="symptoms-column working">
-          <h3>✅ What's Working</h3>
+          <h3><i data-lucide="check-circle" class="inline-icon text-success"></i> What's Working</h3>
           <ul>
             ${symptoms.working.map(s => `<li>${s}</li>`).join('')}
           </ul>
         </div>
         <div class="symptoms-column broken">
-          <h3>❌ What's Broken</h3>
+          <h3><i data-lucide="x-circle" class="inline-icon text-danger"></i> What's Broken</h3>
           <ul>
             ${symptoms.broken.map(s => `<li>${s}</li>`).join('')}
           </ul>
@@ -134,7 +139,7 @@ function renderCluesSection(caseData, progress) {
   return `
     <section class="clues-section">
       <div class="clues-header">
-        <h2>🗂️ Evidence Board</h2>
+        <h2><i data-lucide="folder-open" class="section-icon"></i> Evidence Board</h2>
         <span class="clue-counter">${cluesRevealed}/${totalClues} clues revealed</span>
       </div>
 
@@ -144,13 +149,13 @@ function renderCluesSection(caseData, progress) {
         ${hasMoreClues ? `
           <div class="clue-placeholder">
             <button class="btn btn-secondary" id="btn-reveal-clue">
-              🔍 Investigate More (+1 clue)
+              <i data-lucide="search"></i> Investigate More (+1 clue)
             </button>
             <p class="placeholder-text">${totalClues - cluesRevealed} more clue${totalClues - cluesRevealed > 1 ? 's' : ''} available</p>
           </div>
         ` : `
           <div class="all-clues-revealed">
-            <p>📋 All evidence has been examined</p>
+            <p><i data-lucide="check-check" class="inline-icon"></i> All evidence has been examined</p>
           </div>
         `}
       </div>
@@ -162,7 +167,7 @@ function renderCluesSection(caseData, progress) {
  * Render a single clue
  */
 function renderClue(clue, index) {
-  const icon = clueTypeIcons[clue.type] || '📋';
+  const iconName = clueTypeIcons[clue.type] || 'file-text';
 
   // Process content to highlight code blocks
   let content = clue.content;
@@ -178,14 +183,14 @@ function renderClue(clue, index) {
   return `
     <div class="clue-card" data-clue-id="${clue.id}">
       <div class="clue-header">
-        <span class="clue-icon">${icon}</span>
+        <i data-lucide="${iconName}" class="clue-icon"></i>
         <span class="clue-title">${clue.title}</span>
         <span class="clue-type badge">${clue.type}</span>
       </div>
       <div class="clue-content">${content}</div>
       ${clue.hint ? `
         <div class="clue-hint-container" data-hint-id="${clue.id}">
-          <button type="button" class="btn-show-hint" data-hint-id="${clue.id}">💡 Show Hint</button>
+          <button type="button" class="btn-show-hint" data-hint-id="${clue.id}"><i data-lucide="lightbulb"></i> Show Hint</button>
           <div class="clue-hint hidden" data-hint-id="${clue.id}">${clue.hint}</div>
         </div>
       ` : ''}
@@ -200,9 +205,9 @@ function renderDiagnosisSection(caseData, progress) {
   if (progress.solved) {
     return `
       <section class="diagnosis-section solved">
-        <h2>🎉 Case Closed!</h2>
+        <h2><i data-lucide="badge-check" class="section-icon text-success"></i> Case Closed!</h2>
         <p class="solved-message">You correctly identified the root cause.</p>
-        <button class="btn btn-primary" id="btn-view-solution">View Full Solution</button>
+        <button class="btn btn-primary" id="btn-view-solution"><i data-lucide="eye"></i> View Full Solution</button>
       </section>
     `;
   }
@@ -210,16 +215,16 @@ function renderDiagnosisSection(caseData, progress) {
   if (progress.gaveUp) {
     return `
       <section class="diagnosis-section gave-up">
-        <h2>📖 Solution Revealed</h2>
+        <h2><i data-lucide="book-open" class="section-icon"></i> Solution Revealed</h2>
         <p class="gave-up-message">You requested to see the solution.</p>
-        <button class="btn btn-primary" id="btn-view-solution">View Full Solution</button>
+        <button class="btn btn-primary" id="btn-view-solution"><i data-lucide="eye"></i> View Full Solution</button>
       </section>
     `;
   }
 
   return `
     <section class="diagnosis-section">
-      <h2>🎯 Your Diagnosis</h2>
+      <h2><i data-lucide="target" class="section-icon"></i> Your Diagnosis</h2>
       <p class="diagnosis-instructions">Based on the evidence, what's causing this incident?</p>
 
       <div class="diagnosis-form">
@@ -230,17 +235,17 @@ function renderDiagnosisSection(caseData, progress) {
         ></textarea>
         <div class="diagnosis-actions">
           <button class="btn btn-primary" id="btn-submit-diagnosis">
-            Submit Diagnosis
+            <i data-lucide="send"></i> Submit Diagnosis
           </button>
           <button class="btn btn-ghost" id="btn-give-up">
-            Give Up & See Solution
+            <i data-lucide="flag"></i> Give Up & See Solution
           </button>
         </div>
       </div>
 
       <div id="diagnosis-feedback" class="diagnosis-feedback hidden"></div>
 
-      <p class="attempt-counter">Attempts: ${progress.attempts}</p>
+      <p class="attempt-counter"><i data-lucide="hash" class="inline-icon"></i> Attempts: ${progress.attempts}</p>
     </section>
   `;
 }
@@ -252,7 +257,7 @@ function renderChatPanel(caseData) {
   return `
     <div class="chat-panel">
       <div class="chat-header">
-        <h3>🕵️ Detective Claude</h3>
+        <h3><i data-lucide="user-search" class="section-icon"></i> Detective Claude</h3>
         <p class="chat-subtitle">Your AI investigation partner</p>
       </div>
 
@@ -272,7 +277,7 @@ function renderChatPanel(caseData) {
           placeholder="Ask Detective Claude for guidance..."
           rows="2"
         ></textarea>
-        <button class="btn btn-chat" id="btn-send-message">Send</button>
+        <button class="btn btn-chat" id="btn-send-message"><i data-lucide="send"></i></button>
       </div>
     </div>
   `;

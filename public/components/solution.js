@@ -9,46 +9,46 @@ export function renderSolution(container, caseData, solution, wasSolved, onBack)
   container.innerHTML = `
     <div class="solution-view">
       <header class="solution-header">
-        <button class="btn-back" id="btn-back">← Back to Case</button>
+        <button class="btn-back" id="btn-back"><i data-lucide="arrow-left"></i> Back to Case</button>
         <div class="solution-title-section">
-          <h1>${wasSolved ? '🎉 Case Closed!' : '📖 Solution Revealed'}</h1>
+          <h1>${wasSolved ? '<i data-lucide="badge-check" class="header-icon text-success"></i> Case Closed!' : '<i data-lucide="book-open" class="header-icon"></i> Solution Revealed'}</h1>
           <h2>${caseData.title}</h2>
         </div>
         ${wasSolved ? '<div class="solved-badge">SOLVED</div>' : ''}
       </header>
 
       <section class="solution-section diagnosis">
-        <h2>🎯 Root Cause</h2>
+        <h2><i data-lucide="target" class="section-icon"></i> Root Cause</h2>
         <div class="diagnosis-box">
           <p class="diagnosis-text">${solution.diagnosis}</p>
         </div>
       </section>
 
       <section class="solution-section root-cause">
-        <h2>🔍 Full Explanation</h2>
+        <h2><i data-lucide="search" class="section-icon"></i> Full Explanation</h2>
         <div class="explanation-content">
           ${formatExplanation(solution.rootCause)}
         </div>
       </section>
 
       <section class="solution-section code-examples">
-        <h2>💻 Code Solutions</h2>
+        <h2><i data-lucide="code-2" class="section-icon"></i> Code Solutions</h2>
         ${solution.codeExamples.map(example => renderCodeExample(example)).join('')}
       </section>
 
       <section class="solution-section prevention">
-        <h2>🛡️ Prevention Strategies</h2>
+        <h2><i data-lucide="shield" class="section-icon"></i> Prevention Strategies</h2>
         <ul class="prevention-list">
           ${solution.prevention.map(p => `<li>${p}</li>`).join('')}
         </ul>
       </section>
 
       <section class="solution-section insights">
-        <h2>📚 Educational Insights</h2>
+        <h2><i data-lucide="graduation-cap" class="section-icon"></i> Educational Insights</h2>
         <div class="insights-grid">
           ${solution.educationalInsights.map(insight => `
             <div class="insight-card">
-              <span class="insight-icon">💡</span>
+              <i data-lucide="lightbulb" class="insight-icon"></i>
               <p>${insight}</p>
             </div>
           `).join('')}
@@ -56,7 +56,7 @@ export function renderSolution(container, caseData, solution, wasSolved, onBack)
       </section>
 
       <section class="solution-section next-steps">
-        <h2>🚀 What's Next?</h2>
+        <h2><i data-lucide="rocket" class="section-icon"></i> What's Next?</h2>
         <div class="next-steps-content">
           <p>You've ${wasSolved ? 'solved' : 'learned about'} this case! Here's what you can do next:</p>
           <ul>
@@ -64,7 +64,7 @@ export function renderSolution(container, caseData, solution, wasSolved, onBack)
             <li>Research the related technologies mentioned in this case</li>
             <li>Discuss with the AI Detective about similar patterns</li>
           </ul>
-          <button class="btn btn-primary" id="btn-back-to-cases">Browse More Cases</button>
+          <button class="btn btn-primary" id="btn-back-to-cases"><i data-lucide="folder-open"></i> Browse More Cases</button>
         </div>
       </section>
     </div>
@@ -75,6 +75,11 @@ export function renderSolution(container, caseData, solution, wasSolved, onBack)
   container.querySelector('#btn-back-to-cases')?.addEventListener('click', () => {
     window.location.hash = '';
   });
+
+  // Initialize Lucide icons
+  if (window.lucide) {
+    window.lucide.createIcons();
+  }
 
   // Syntax highlighting if Prism is available
   if (typeof Prism !== 'undefined') {

@@ -13,15 +13,15 @@ const difficultyConfig = {
 };
 
 /**
- * Category icons (emoji-based for simplicity)
+ * Category icons using Lucide icon names
  */
 const categoryIcons = {
-  database: '🗄️',
-  caching: '📦',
-  networking: '🌐',
-  auth: '🔐',
-  memory: '🧠',
-  distributed: '🔗',
+  database: 'database',
+  caching: 'archive',
+  networking: 'globe',
+  auth: 'shield',
+  memory: 'cpu',
+  distributed: 'network',
 };
 
 /**
@@ -32,18 +32,21 @@ export function renderCaseList(container, cases, solvedCases, onSelectCase) {
 
   container.innerHTML = `
     <div class="case-list-header">
-      <h1>🔍 Backend Engineer Detective</h1>
-      <p class="subtitle">16 production incidents. 16 mysteries to solve. Can you find the root cause?</p>
+      <h1><i data-lucide="search" class="header-icon"></i> Backend Engineer Detective</h1>
+      <p class="subtitle">${cases.length} production incidents. ${cases.length} mysteries to solve. Can you find the root cause?</p>
       <div class="stats-bar">
         <span class="stat">
+          <i data-lucide="check-circle" class="stat-icon"></i>
           <span class="stat-value">${solvedCases.length}</span>
           <span class="stat-label">Solved</span>
         </span>
         <span class="stat">
+          <i data-lucide="folder-open" class="stat-icon"></i>
           <span class="stat-value">${cases.length - solvedCases.length}</span>
           <span class="stat-label">Remaining</span>
         </span>
         <span class="stat">
+          <i data-lucide="percent" class="stat-icon"></i>
           <span class="stat-value">${Math.round((solvedCases.length / cases.length) * 100)}%</span>
           <span class="stat-label">Complete</span>
         </span>
@@ -54,6 +57,11 @@ export function renderCaseList(container, cases, solvedCases, onSelectCase) {
       ${cases.map((c, index) => renderCaseCard(c, index + 1, solvedSet.has(c.id))).join('')}
     </div>
   `;
+
+  // Initialize Lucide icons
+  if (window.lucide) {
+    window.lucide.createIcons();
+  }
 
   // Add click handlers
   container.querySelectorAll('.case-card').forEach(card => {
@@ -69,20 +77,20 @@ export function renderCaseList(container, cases, solvedCases, onSelectCase) {
  */
 function renderCaseCard(caseData, caseNumber, isSolved) {
   const difficulty = difficultyConfig[caseData.difficulty];
-  const icon = categoryIcons[caseData.category] || '📋';
+  const iconName = categoryIcons[caseData.category] || 'file-text';
 
   return `
     <div class="case-card ${isSolved ? 'solved' : ''}" data-case-id="${caseData.id}">
       <div class="case-card-header">
         <span class="case-number">#${String(caseNumber).padStart(2, '0')}</span>
-        <span class="case-icon">${icon}</span>
+        <i data-lucide="${iconName}" class="case-icon"></i>
         ${isSolved ? '<span class="solved-stamp">SOLVED</span>' : ''}
       </div>
       <h3 class="case-title">${caseData.title}</h3>
       <p class="case-subtitle">${caseData.subtitle}</p>
       <div class="case-meta">
         <span class="badge ${difficulty.class}">${difficulty.label}</span>
-        <span class="clue-count">${caseData.totalClues} clues</span>
+        <span class="clue-count"><i data-lucide="file-search" class="clue-icon"></i> ${caseData.totalClues} clues</span>
       </div>
     </div>
   `;
@@ -106,10 +114,13 @@ export function showLoading(container) {
 export function showError(container, message) {
   container.innerHTML = `
     <div class="error-state">
-      <span class="error-icon">⚠️</span>
+      <i data-lucide="alert-triangle" class="error-icon"></i>
       <h2>Something went wrong</h2>
       <p>${message}</p>
       <button class="btn btn-primary" onclick="location.reload()">Try Again</button>
     </div>
   `;
+  if (window.lucide) {
+    window.lucide.createIcons();
+  }
 }
