@@ -92,9 +92,16 @@ async function showCaseList() {
 
 /**
  * Show the case investigation view
+ * @param {string} caseId - The case ID
+ * @param {Object} options - Optional settings
+ * @param {boolean} options.skipLoading - Skip the loading state (for smooth transitions)
  */
-async function showCaseView(caseId) {
-  showLoading(mainContainer);
+async function showCaseView(caseId, options = {}) {
+  const { skipLoading = false } = options;
+
+  if (!skipLoading) {
+    showLoading(mainContainer);
+  }
 
   try {
     // Get progress for this case
@@ -165,15 +172,16 @@ async function handleRevealClue(caseId) {
   // Save scroll position before re-rendering
   const scrollPosition = window.scrollY;
 
-  const progress = state.getCaseProgress(appState, caseId);
-  const newClueCount = state.revealClue(appState, caseId, currentCaseData.totalClues);
+  state.revealClue(appState, caseId, currentCaseData.totalClues);
 
-  // Reload the case view with the new clue
-  await showCaseView(caseId);
+  // Reload the case view with the new clue (skip loading to preserve scroll)
+  await showCaseView(caseId, { skipLoading: true });
 
-  // Restore scroll position after render
+  // Restore scroll position after render (double RAF ensures DOM is ready)
   requestAnimationFrame(() => {
-    window.scrollTo(0, scrollPosition);
+    requestAnimationFrame(() => {
+      window.scrollTo(0, scrollPosition);
+    });
   });
 }
 
