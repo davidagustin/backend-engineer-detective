@@ -1,153 +1,256 @@
-# LLM Chat Application Template
+# 🔍 Backend Engineer Detective
 
-A simple, ready-to-deploy chat application template powered by Cloudflare Workers AI. This template provides a clean starting point for building AI chat applications with streaming responses.
+**Solve 16 production incidents from PlayStation-scale scenarios.**
 
-[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/cloudflare/templates/tree/main/llm-chat-app-template)
+An interactive detective game where you investigate real-world backend engineering incidents. Analyze logs, metrics, code, and testimonies to diagnose root causes — with an AI mentor to guide your investigation.
 
-<!-- dash-content-start -->
+### 🎮 [Play Now → backend-engineer-detective.davidsyagustin.workers.dev](https://backend-engineer-detective.davidsyagustin.workers.dev)
 
-## Demo
+![Theme](https://img.shields.io/badge/theme-detective%20noir-black)
+![Cases](https://img.shields.io/badge/cases-16-e94560)
+![Difficulty](https://img.shields.io/badge/difficulty-junior%20→%20principal-f0a500)
+![Platform](https://img.shields.io/badge/platform-Cloudflare%20Workers-F6821F)
+[![Live Demo](https://img.shields.io/badge/demo-live-brightgreen)](https://backend-engineer-detective.davidsyagustin.workers.dev)
 
-This template demonstrates how to build an AI-powered chat interface using Cloudflare Workers AI with streaming responses. It features:
+---
 
-- Real-time streaming of AI responses using Server-Sent Events (SSE)
-- Easy customization of models and system prompts
-- Support for AI Gateway integration
-- Clean, responsive UI that works on mobile and desktop
+## 🎮 How It Works
 
-## Features
+1. **Pick a Case** — Choose from 16 incidents across database, caching, networking, auth, memory, and distributed systems
+2. **Investigate** — Examine clues progressively: error logs, metrics dashboards, code snippets, config files, and engineer testimonies
+3. **Chat with Detective Claude** — Your AI mentor asks Socratic questions to guide your thinking (without giving away the answer)
+4. **Submit Your Diagnosis** — Describe the root cause in your own words
+5. **Learn** — Get detailed explanations, code fixes, and prevention strategies
 
-- 💬 Simple and responsive chat interface
-- ⚡ Server-Sent Events (SSE) for streaming responses
-- 🧠 Powered by Cloudflare Workers AI LLMs
-- 🛠️ Built with TypeScript and Cloudflare Workers
-- 📱 Mobile-friendly design
-- 🔄 Maintains chat history on the client
-- 🔎 Built-in Observability logging
-<!-- dash-content-end -->
+---
 
-## Getting Started
+## 🗂️ The 16 Cases
+
+| # | Case | Difficulty | Category |
+|---|------|------------|----------|
+| 1 | The Database Disappearing Act | Mid | Database |
+| 2 | The Black Friday Disaster | Senior | Distributed |
+| 3 | The Memory Explosion Mystery | Mid | Caching |
+| 4 | The Ghost Users Problem | Junior | Caching |
+| 5 | The Infinite Loop Incident | Senior | Auth |
+| 6 | The Mysterious Memory Leak | Principal | Memory |
+| 7 | The Silent Authentication Crisis | Mid | Auth |
+| 8 | The Vanishing Achievements | Junior | Caching |
+| 9 | The Weekend Warriors Crisis | Mid | Caching |
+| 10 | The Mysterious Slow Logins | Mid | Database |
+| 11 | The Phantom Friend Requests | Junior | Database |
+| 12 | The Midnight Data Swap | Senior | Distributed |
+| 13 | The Database Inconsistency | Mid | Database |
+| 14 | The Invisible API | Junior | Networking |
+| 15 | The Vanishing Multiplayer Matches | Senior | Networking |
+| 16 | The Invisible Traffic Spike | Principal | Distributed |
+
+---
+
+## 🚀 Quick Start
 
 ### Prerequisites
 
-- [Node.js](https://nodejs.org/) (v18 or newer)
-- [Wrangler CLI](https://developers.cloudflare.com/workers/wrangler/install-and-update/)
-- A Cloudflare account with Workers AI access
+- Node.js 18+
+- npm or yarn
+- Cloudflare account (for deployment)
 
-### Installation
-
-1. Clone this repository:
-
-   ```bash
-   git clone https://github.com/cloudflare/templates.git
-   cd templates/llm-chat-app
-   ```
-
-2. Install dependencies:
-
-   ```bash
-   npm install
-   ```
-
-3. Generate Worker type definitions:
-   ```bash
-   npm run cf-typegen
-   ```
-
-### Development
-
-Start a local development server:
+### Local Development
 
 ```bash
+# Clone the repository
+git clone https://github.com/davidagustin/backend-engineer-detective.git
+cd backend-engineer-detective
+
+# Install dependencies
+npm install
+
+# Start development server
 npm run dev
 ```
 
-This will start a local server at http://localhost:8787.
+Open [http://localhost:8787](http://localhost:8787) in your browser.
 
-Note: Using Workers AI accesses your Cloudflare account even during local development, which will incur usage charges.
-
-### Deployment
-
-Deploy to Cloudflare Workers:
+### Deploy to Cloudflare Workers
 
 ```bash
+# Login to Cloudflare
+npx wrangler login
+
+# Deploy
 npm run deploy
 ```
 
-### Monitor
+---
 
-View real-time logs associated with any deployed Worker:
-
-```bash
-npm wrangler tail
-```
-
-## Project Structure
+## 🏗️ Architecture
 
 ```
-/
-├── public/             # Static assets
-│   ├── index.html      # Chat UI HTML
-│   └── chat.js         # Chat UI frontend script
+┌─────────────────────────────────────────────────────────────────────┐
+│                        FRONTEND (public/)                          │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐           │
+│  │ Case     │  │ Case     │  │ Chat     │  │ Solution │           │
+│  │ Grid     │  │ View     │  │ Panel    │  │ Display  │           │
+│  └────┬─────┘  └────┬─────┘  └────┬─────┘  └────┬─────┘           │
+│       └──────────────┴──────────────┴──────────────┘               │
+│                          app.js + state.js                         │
+└─────────────────────────────────────────────────────────────────────┘
+                                  │
+                                  ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│                   CLOUDFLARE WORKER (src/)                         │
+│  GET  /api/cases           → List all cases                        │
+│  GET  /api/cases/:id       → Get case with clues (progressive)     │
+│  POST /api/cases/:id/check → Check diagnosis guess                 │
+│  POST /api/chat            → AI chat with case context (SSE)       │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+### Tech Stack
+
+- **Runtime:** Cloudflare Workers (TypeScript)
+- **AI:** Workers AI (Llama 3.1 8B) with SSE streaming
+- **Frontend:** Vanilla HTML/JS/CSS (no framework, no build step)
+- **Styling:** Detective noir theme with Prism.js syntax highlighting
+
+---
+
+## 📁 Project Structure
+
+```
+backend-engineer-detective/
+├── public/
+│   ├── index.html              # SPA shell
+│   ├── styles.css              # Detective noir theme
+│   ├── app.js                  # Main controller + routing
+│   ├── state.js                # localStorage progress tracking
+│   ├── api.js                  # API client with SSE support
+│   └── components/
+│       ├── case-list.js        # Case selection grid
+│       ├── case-view.js        # Investigation interface
+│       └── solution.js         # Solution reveal
+│
 ├── src/
-│   ├── index.ts        # Main Worker entry point
-│   └── types.ts        # TypeScript type definitions
-├── test/               # Test files
-├── wrangler.jsonc      # Cloudflare Worker configuration
-├── tsconfig.json       # TypeScript configuration
-└── README.md           # This documentation
+│   ├── index.ts                # Main worker with API routes
+│   ├── types.ts                # TypeScript interfaces
+│   ├── cases/
+│   │   ├── index.ts            # Case registry
+│   │   └── data/               # 16 case definition files
+│   └── utils/
+│       ├── prompt-builder.ts   # AI system prompts
+│       └── diagnosis-matcher.ts # Fuzzy answer matching
+│
+├── wrangler.jsonc              # Cloudflare config
+├── tsconfig.json               # TypeScript config
+└── package.json
 ```
 
-## How It Works
+---
 
-### Backend
+## 🔌 API Reference
 
-The backend is built with Cloudflare Workers and uses the Workers AI platform to generate responses. The main components are:
+### List All Cases
 
-1. **API Endpoint** (`/api/chat`): Accepts POST requests with chat messages and streams responses
-2. **Streaming**: Uses Server-Sent Events (SSE) for real-time streaming of AI responses
-3. **Workers AI Binding**: Connects to Cloudflare's AI service via the Workers AI binding
+```http
+GET /api/cases
+```
 
-### Frontend
+### Get Case Details
 
-The frontend is a simple HTML/CSS/JavaScript application that:
+```http
+GET /api/cases/:id?clues=N
+```
 
-1. Presents a chat interface
-2. Sends user messages to the API
-3. Processes streaming responses in real-time
-4. Maintains chat history on the client side
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `id` | string | Case ID (e.g., `database-disappearing-act`) |
+| `clues` | number | Number of clues to reveal (default: 2) |
 
-## Customization
+### Submit Diagnosis
 
-### Changing the Model
+```http
+POST /api/cases/:id/check
+Content-Type: application/json
 
-To use a different AI model, update the `MODEL_ID` constant in `src/index.ts`. You can find available models in the [Cloudflare Workers AI documentation](https://developers.cloudflare.com/workers-ai/models/).
+{
+  "diagnosis": "connection pool exhaustion due to unreleased connections",
+  "attemptCount": 1,
+  "cluesRevealed": 4
+}
+```
 
-### Using AI Gateway
+### Chat with AI
 
-The template includes commented code for AI Gateway integration, which provides additional capabilities like rate limiting, caching, and analytics.
+```http
+POST /api/chat
+Content-Type: application/json
 
-To enable AI Gateway:
+{
+  "messages": [{ "role": "user", "content": "What pattern do you see?" }],
+  "caseContext": { "caseId": "database-disappearing-act", "cluesRevealed": 3 }
+}
+```
 
-1. [Create an AI Gateway](https://dash.cloudflare.com/?to=/:account/ai/ai-gateway) in your Cloudflare dashboard
-2. Uncomment the gateway configuration in `src/index.ts`
-3. Replace `YOUR_GATEWAY_ID` with your actual AI Gateway ID
-4. Configure other gateway options as needed:
-   - `skipCache`: Set to `true` to bypass gateway caching
-   - `cacheTtl`: Set the cache time-to-live in seconds
+---
 
-Learn more about [AI Gateway](https://developers.cloudflare.com/ai-gateway/).
+## 🎨 Features
 
-### Modifying the System Prompt
+### Progressive Clue Reveal
+- 📊 **Metrics** — Dashboards, graphs, numbers
+- 📜 **Logs** — Error messages, stack traces
+- 💻 **Code** — Source code snippets
+- ⚙️ **Config** — Configuration files
+- 💬 **Testimony** — Engineer statements
 
-The default system prompt can be changed by updating the `SYSTEM_PROMPT` constant in `src/index.ts`.
+### AI Detective Mentor
+- Asks probing questions
+- Points out connections between clues
+- Never reveals the answer directly
+- Celebrates good deductions
 
-### Styling
+### Progress Tracking
+- Cases solved
+- Clues revealed per case
+- Chat history
+- Attempt counts
 
-The UI styling is contained in the `<style>` section of `public/index.html`. You can modify the CSS variables at the top to quickly change the color scheme.
+---
 
-## Resources
+## 📚 Learning Outcomes
 
-- [Cloudflare Workers Documentation](https://developers.cloudflare.com/workers/)
-- [Cloudflare Workers AI Documentation](https://developers.cloudflare.com/workers-ai/)
-- [Workers AI Models](https://developers.cloudflare.com/workers-ai/models/)
+| Concept | Cases |
+|---------|-------|
+| Connection pooling | #1, #10 |
+| Message queue backpressure | #2 |
+| Redis streams & TTL | #3, #8 |
+| Presence systems & heartbeats | #4 |
+| Token management | #5 |
+| Native memory & fragmentation | #6 |
+| Certificate chains & CDN | #7, #14 |
+| Cache warming | #9 |
+| SQL LIKE wildcards | #10 |
+| Read-after-write consistency | #13 |
+| UDP NAT traversal | #15 |
+| GeoDNS & traffic routing | #16 |
+
+---
+
+## 🤝 Contributing
+
+Contributions welcome! See the [wiki](../../wiki) for detailed guides on:
+- [Adding New Cases](../../wiki/Adding-New-Cases)
+- [API Documentation](../../wiki/API-Documentation)
+- [Architecture Deep Dive](../../wiki/Architecture)
+
+---
+
+## 📄 License
+
+MIT License
+
+---
+
+<p align="center">
+  <strong>🔍 Can you solve all 16 cases?</strong><br>
+  <em>Put your debugging skills to the test.</em>
+</p>
