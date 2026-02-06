@@ -571,6 +571,95 @@ export function updateScoreDisplay(container, score, elapsedSeconds) {
 }
 
 /**
+ * Inject a new clue into the DOM without re-rendering the page.
+ * Updates the clue counter, placeholder text, and adds hint handler.
+ */
+export function injectNewClue(container, newClue, cluesRevealed, totalClues, onHintViewed, onRevealClue) {
+  const cluesBoard = container.querySelector('.clues-board');
+  const placeholder = container.querySelector('.clue-placeholder');
+  if (!cluesBoard || !placeholder) return;
+
+  // Create the new clue card element
+  const temp = document.createElement('div');
+  temp.innerHTML = renderClue(newClue, cluesRevealed - 1);
+  const clueCard = temp.firstElementChild;
+
+  // Insert before the placeholder
+  cluesBoard.insertBefore(clueCard, placeholder);
+
+  // Update clue counter
+  const counter = container.querySelector('.clue-counter');
+  if (counter) {
+    counter.textContent = `${cluesRevealed} of ${totalClues} clues examined`;
+  }
+
+  // Update the clues stat in score panel
+  const cluesStat = container.querySelector('.score-stats');
+  if (cluesStat) {
+    const statSpans = cluesStat.querySelectorAll('.stat');
+    statSpans.forEach(span => {
+      if (span.textContent.includes('Clues:')) {
+        span.innerHTML = `<i data-lucide="folder-open" class="inline-icon"></i> Clues: ${cluesRevealed}/${totalClues}`;
+      }
+    });
+  }
+
+  const remaining = totalClues - cluesRevealed;
+  if (remaining > 0) {
+    // Update placeholder text and re-bind click handler
+    const placeholderText = placeholder.querySelector('.placeholder-text');
+    if (placeholderText) {
+      placeholderText.textContent = `${remaining} more clue${remaining > 1 ? 's' : ''} available`;
+    }
+    // Replace button to clear old listener, bind new one
+    const oldBtn = placeholder.querySelector('#btn-reveal-clue');
+    if (oldBtn) {
+      const newBtn = oldBtn.cloneNode(true);
+      oldBtn.replaceWith(newBtn);
+      newBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        onRevealClue();
+      });
+    }
+  } else {
+    // All clues revealed — replace placeholder
+    placeholder.innerHTML = `
+      <div class="all-clues-revealed">
+        <p><i data-lucide="check-circle-2" class="inline-icon"></i> All evidence examined</p>
+      </div>
+    `;
+  }
+
+  // Attach hint handler for the new clue
+  const hintBtn = clueCard.querySelector('.btn-show-hint');
+  if (hintBtn) {
+    hintBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const hintId = hintBtn.dataset.hintId;
+      const hintEl = clueCard.querySelector(`.clue-hint[data-hint-id="${hintId}"]`);
+      if (hintEl) {
+        hintEl.classList.remove('hidden');
+        hintBtn.style.display = 'none';
+        if (onHintViewed) {
+          const newCount = onHintViewed(hintId);
+          const hintsCountEl = container.querySelector('#hints-count');
+          if (hintsCountEl) {
+            hintsCountEl.textContent = newCount;
+          }
+        }
+      }
+    });
+  }
+
+  // Re-initialize Lucide icons for the new elements
+  if (window.lucide) {
+    window.lucide.createIcons();
+  }
+}
+
+/**
  * Update the hints count display
  */
 export function updateHintsCount(container, count) {

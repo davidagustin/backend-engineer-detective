@@ -13,7 +13,8 @@ import {
   addStreamingMessage,
   finalizeStreamingMessage,
   updateScoreDisplay,
-  setSubmitLoading
+  setSubmitLoading,
+  injectNewClue
 } from './components/case-view.js';
 import { renderSolution } from './components/solution.js';
 
@@ -169,18 +170,25 @@ async function showSolutionView(caseId) {
  * Handle revealing a new clue
  */
 async function handleRevealClue(caseId) {
-  const scrollPosition = window.scrollY;
-
   state.revealClue(appState, caseId, currentCaseData.totalClues);
 
-  // Reload the case view with the new clue (skip loading to preserve scroll)
-  await showCaseView(caseId, { skipLoading: true });
+  const progress = state.getCaseProgress(appState, caseId);
 
-  // Restore scroll after render — immediate + rAF to cover layout timing
-  window.scrollTo(0, scrollPosition);
-  requestAnimationFrame(() => {
-    window.scrollTo(0, scrollPosition);
-  });
+  // Fetch updated case data with the new clue
+  currentCaseData = await api.fetchCase(caseId, progress.cluesRevealed);
+
+  // Get the newly revealed clue (last in the array)
+  const newClue = currentCaseData.clues[currentCaseData.clues.length - 1];
+
+  // Inject just the new clue into the DOM — no full re-render, no scroll reset
+  injectNewClue(
+    mainContainer,
+    newClue,
+    progress.cluesRevealed,
+    currentCaseData.totalClues,
+    (hintId) => handleHintViewed(caseId, hintId),
+    () => handleRevealClue(caseId)
+  );
 }
 
 /**
