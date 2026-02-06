@@ -172,12 +172,23 @@ function renderNoResults() {
 /**
  * Render the case list view
  */
-export function renderCaseList(container, cases, solvedCases, onSelectCase) {
+export function renderCaseList(container, cases, solvedCases, onSelectCase, onResetProgress) {
   const solvedSet = new Set(solvedCases);
   const filteredCases = filterCases(cases, solvedSet);
 
   container.innerHTML = `
     <div class="case-list-header">
+      <div class="settings-container">
+        <button class="btn-settings" id="settings-btn" aria-label="Settings">
+          <i data-lucide="settings"></i>
+        </button>
+        <div class="settings-dropdown" id="settings-dropdown" style="display: none;">
+          <button class="settings-dropdown-item" id="reset-progress-btn">
+            <i data-lucide="trash-2" class="text-danger"></i>
+            <span class="text-danger">Reset All Progress</span>
+          </button>
+        </div>
+      </div>
       <h1><i data-lucide="search" class="header-icon"></i> Backend Engineer Detective</h1>
       <p class="subtitle">${cases.length} production incidents. Can you find the root cause?</p>
       <div class="stats-bar">
@@ -225,7 +236,7 @@ export function renderCaseList(container, cases, solvedCases, onSelectCase) {
   });
 
   // Add filter event listeners
-  const rerender = () => renderCaseList(container, cases, solvedCases, onSelectCase);
+  const rerender = () => renderCaseList(container, cases, solvedCases, onSelectCase, onResetProgress);
 
   container.querySelector('#filter-difficulty')?.addEventListener('change', (e) => {
     filterState.difficulty = e.target.value;
@@ -250,6 +261,115 @@ export function renderCaseList(container, cases, solvedCases, onSelectCase) {
   container.querySelector('#filter-search')?.addEventListener('input', (e) => {
     debouncedSearch(e.target.value);
   });
+
+  // Settings dropdown handlers
+  const settingsBtn = container.querySelector('#settings-btn');
+  const settingsDropdown = container.querySelector('#settings-dropdown');
+  const resetProgressBtn = container.querySelector('#reset-progress-btn');
+
+  if (settingsBtn && settingsDropdown) {
+    // Toggle dropdown
+    settingsBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const isVisible = settingsDropdown.style.display === 'block';
+      settingsDropdown.style.display = isVisible ? 'none' : 'block';
+    });
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!settingsBtn.contains(e.target) && !settingsDropdown.contains(e.target)) {
+        settingsDropdown.style.display = 'none';
+      }
+    });
+  }
+
+  // Reset progress button
+  if (resetProgressBtn) {
+    resetProgressBtn.addEventListener('click', () => {
+      settingsDropdown.style.display = 'none';
+      showResetConfirmationModal(onResetProgress);
+    });
+  }
+}
+
+/**
+ * Show reset confirmation modal
+ */
+function showResetConfirmationModal(onConfirm) {
+  // Create modal overlay
+  const modalHtml = `
+    <div class="modal-overlay" id="reset-modal">
+      <div class="modal-dialog">
+        <div class="modal-header">
+          <h3>Reset All Progress</h3>
+          <button class="btn-modal-close" id="modal-close-btn" aria-label="Close">
+            <i data-lucide="x"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <p>This will clear all your solved cases, scores, chat history, and investigation progress. This action cannot be undone.</p>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-cancel" id="modal-cancel-btn">Cancel</button>
+          <button class="btn-danger" id="modal-confirm-btn">Reset Everything</button>
+        </div>
+      </div>
+    </div>
+  `;
+
+  // Add modal to body
+  const modalContainer = document.createElement('div');
+  modalContainer.innerHTML = modalHtml;
+  document.body.appendChild(modalContainer.firstElementChild);
+
+  // Initialize Lucide icons for the modal
+  if (window.lucide) {
+    window.lucide.createIcons();
+  }
+
+  const modal = document.getElementById('reset-modal');
+  const closeBtn = document.getElementById('modal-close-btn');
+  const cancelBtn = document.getElementById('modal-cancel-btn');
+  const confirmBtn = document.getElementById('modal-confirm-btn');
+
+  // Close modal function
+  const closeModal = () => {
+    modal.remove();
+  };
+
+  // Close on overlay click
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) {
+      closeModal();
+    }
+  });
+
+  // Close on X button
+  if (closeBtn) {
+    closeBtn.addEventListener('click', closeModal);
+  }
+
+  // Close on Cancel button
+  if (cancelBtn) {
+    cancelBtn.addEventListener('click', closeModal);
+  }
+
+  // Close on Escape key
+  const escapeHandler = (e) => {
+    if (e.key === 'Escape') {
+      closeModal();
+      document.removeEventListener('keydown', escapeHandler);
+    }
+  };
+  document.addEventListener('keydown', escapeHandler);
+
+  // Confirm reset
+  if (confirmBtn) {
+    confirmBtn.addEventListener('click', () => {
+      closeModal();
+      onConfirm();
+    });
+  }
 }
 
 /**

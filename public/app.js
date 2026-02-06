@@ -83,6 +83,10 @@ async function showCaseList() {
       (caseId) => {
         state.setCurrentCase(appState, caseId);
         window.location.hash = `case/${caseId}`;
+      },
+      () => {
+        state.resetAllProgress();
+        window.location.reload();
       }
     );
   } catch (error) {
