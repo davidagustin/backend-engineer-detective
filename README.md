@@ -1,16 +1,16 @@
 # Backend Engineer Detective
 
-**Solve 121 production incidents from PlayStation-scale scenarios.**
+**Solve 121 production incidents from real-world scenarios.**
 
 An interactive detective game where you investigate real-world backend engineering incidents. Analyze logs, metrics, code, and testimonies to diagnose root causes — with an AI mentor to guide your investigation.
 
-### [Play Now → backend-engineer-detective.davidsyagustin.workers.dev](https://backend-engineer-detective.davidsyagustin.workers.dev)
+### [Play Now → backend-engineer-detective.app-production.workers.dev](https://backend-engineer-detective.app-production.workers.dev)
 
 ![Theme](https://img.shields.io/badge/theme-detective%20noir-black)
 ![Cases](https://img.shields.io/badge/cases-121-e94560)
 ![Difficulty](https://img.shields.io/badge/difficulty-junior%20→%20principal-f0a500)
 ![Platform](https://img.shields.io/badge/platform-Cloudflare%20Workers-F6821F)
-[![Live Demo](https://img.shields.io/badge/demo-live-brightgreen)](https://backend-engineer-detective.davidsyagustin.workers.dev)
+[![Live Demo](https://img.shields.io/badge/demo-live-brightgreen)](https://backend-engineer-detective.app-production.workers.dev)
 
 ---
 

@@ -1,7 +1,7 @@
 /**
  * Backend Engineer Detective - An AI-powered investigation game
  *
- * Players investigate production incidents from PlayStation-scale scenarios,
+ * Players investigate production incidents from real-world scenarios,
  * using clues and an AI mentor to diagnose root causes.
  *
  * @license MIT
